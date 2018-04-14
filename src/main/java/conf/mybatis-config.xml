@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	<properties resource="conf/dbconfig.properties"></properties>
+	
+	<!-- 
+		setting包含很多重要的设置项
+		setting用来设置每一个设置项
+			name设置项名
+			value设置项取值
+	 -->
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+	</settings>
+	
+	<typeAliases>
+		<!-- 为某个java类型起别名,type:要起别名的全类名 ,默认别名类名小写,alias:指定新的别名-->
+		<!--  <typeAlias type="com.yubajin.mybatis.bean.Employee" alias="emp"/>
+		-->
+		<package name="com.yubajin.mybatis.bean"/>
+	</typeAliases>
+	
+	<environments default="dev_sqlserver">
+	
+		<environment id="dev_mysql">
+	    	<transactionManager type="JDBC"/>
+	        <dataSource type="POOLED">
+		        <property name="driver" value="${jdbc.driver}"/>
+		        <property name="url" value="${jdbc.url}"/>
+		        <property name="username" value="${jdbc.username}"/>
+		        <property name="password" value="${jdbc.password}"/>
+	        </dataSource>
+	    </environment>
+	    
+	    <environment id="dev_sqlserver">
+	    	<transactionManager type="JDBC"/>
+	    	<dataSource type="POOLED">
+	    		<property name="driver" value="${sqlserver.driver}"/>
+		        <property name="url" value="${sqlserver.url}"/>
+		        <property name="username" value="${sqlserver.username}"/>
+		        <property name="password" value="${sqlserver.password}"/>
+	    	</dataSource>
+	    </environment>
+	    
+    </environments>
+    
+	
+	<!--  databaseIdProvider 支持多数据库厂商-->
+	<!-- type="DB_VENDOR"(别名:VendorDatabaseProvider) -->
+	<!-- MyBatis 会加载不带 databaseId 属性和带有匹配当前数据库 databaseId 属性的所有语句。 如果同时找到带有 databaseId 和不带 databaseId 的相同语句，则后者会被舍弃。 -->
+	<databaseIdProvider type="DB_VENDOR">
+		<!-- 为不同数据库厂商起别名 ,在mapper.xml映射配置文件要用到-->
+	  	<property name="MySQL" value="mysql"/>
+	  	<property name="SQL Server" value="sqlserver"/>
+	  	<property name="DB2" value="db2"/>        
+	 	<property name="Oracle" value="oracle" />
+	</databaseIdProvider>
+    
+  <!-- 将我们写好的sql映射文件(EmployeeMapper.xmls)一定要注册到全局变量文件(mybatis-config.xml)中 -->
+ 	<mappers>
+    	<package name="com.yubajin.mybatis.dao"/>
+	</mappers>
+</configuration>

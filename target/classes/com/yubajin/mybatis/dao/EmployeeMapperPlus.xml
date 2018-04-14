@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yubajin.mybatis.dao.EmployeeMapperPlus">  
+
+	<!-- 自定义某个javabean的封装规则
+		type:自定义规则的Java类型
+		id: 定义主键底层会有优化
+		result:定义普通封装规则
+		column:指定哪一列,从数据库中查出的列名，可能是数据库中的别名
+		property:指定对应的javaBean属性
+		
+	 -->
+	 <resultMap type="com.yubajin.mybatis.bean.Employee" id="mySimpleEmp">
+	 	<id column="id" property="id"></id>
+	 	<result column="last_name" property="lastName"></result>
+	 	<!-- 其他不指定的列会自动封装 -->
+	 	<result column="gender" property="gender"></result>
+	 	<result column="email" property="email"></result>
+	 </resultMap>
+	 
+	<!-- 自定义结果集映射规则 -->
+	<select id="getEmpById" resultType="emp" resultMap="mySimpleEmp">
+		select * from tb1_employee where id = #{id}
+	</select>
+	
+	
+	
+	
+	<!-- 
+		联合查询:级联属性封装结果集
+	 -->
+	<resultMap type="com.yubajin.mybatis.bean.Employee" id="myDifEmp">
+	 	<id column="id" property="id"></id>
+	 	<result column="last_name" property="lastName"></result>
+		<result column="gender" property="gender"></result>
+	 	<result column="d_id" property="dept.id"></result>
+		<result column="dept_name" property="dept.departmentName"></result>
+	 </resultMap>
+	 
+	 <!-- 
+	 	使用association定义关联的单个对象的封装规则
+	  -->
+	 <resultMap type="com.yubajin.mybatis.bean.Employee" id="myDifEmp2">
+	 	<id column="id" property="id"></id>
+	 	<result column="last_name" property="lastName"></result>
+		<result column="gender" property="gender"></result>
+		<!-- association可以指定联合的javaBean对象
+			property="dept",指定那个属性是联合的对象
+			javaType:指定这个属性对象的类型[不能省略] -->
+	 	<association property="dept" javaType="com.yubajin.mybatis.bean.Department">
+	 		<id column="d_id" property="id"></id>
+	 		<result column="dept_name" property="departmentName"></result>
+	 	</association>
+	 </resultMap>
+	 
+	<!-- 查询Employee员工的同时查询部门 -->
+	<select id="getEmpAndDept" resultMap="myDifEmp2">
+		select e.id id, e.last_name last_name, e.gender gender, e.d_id d_id, d.dept_name dept_name 
+		from tb1_employee e,tb1_dept d
+		where e.d_id = d.id and e.id=#{id}
+	</select>
+	
+	
+	<!--  使用association进行分步查询
+		  1、先安照员工id查询员工信息
+		  2、根据查询员工信息中的d_id值去部门表查出部门信息
+		  3、部门设置到员工中-->
+		  
+	<resultMap type="com.yubajin.mybatis.bean.Employee" id="MyEmpByIdStep">
+	 	<id column="id" property="id"></id>
+	 	<result column="last_name" property="lastName"></result>
+		<result column="gender" property="gender"></result>
+		
+		<!-- association定义关联对象的封装规则
+			 select:表明当前属性是调用select指定的方法查出的结果
+			 column:指定将哪一列的值传给这个方法
+			 
+			 流程:使用select指定的方法(传入column指定的这列参数的值)查出对象，并封装给propertry指定的属性 -->
+		<association property="dept"
+			select="com.yubajin.mybatis.dao.DepartmentMapper.getDeptById"
+			column="d_id">
+		</association>
+	 </resultMap>
+	<select id="getEmpByIdStep" resultMap="MyEmpByIdStep">
+		select * from tb1_employee where id = #{id}
+	</select>
+</mapper>

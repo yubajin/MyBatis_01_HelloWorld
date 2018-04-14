@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yubajin.mybatis.dao.EmployeeMapper">  
+<!-- 
+namespace:名称空间
+id:唯一标识
+resultType:返回类型
+#{id}:从传递过来的参数中取出id值
+ --> 
+ 
+ 	<select id="getEmpByLastNameLikeReturnMap" resultType="com.yubajin.mybatis.bean.Employee">
+ 		select * from tb1_employee where last_name like #{lastName}
+ 	</select>
+ 
+ 	<!-- resultType可以直接写等于map,是因为mybatis已经给Map起了别名交map -->
+ 	<select id="getEmpByIdReturnMap" resultType="map">
+ 		select * from tb1_employee where id=#{id}
+ 	</select>
+ 
+	<select id="getEmpById" resultType="com.yubajin.mybatis.bean.Employee" databaseId="sqlserver">     
+		select * from tb1_employee where id = #{id}
+	</select>
+	
+	<select id="getEmpById" resultType="com.yubajin.mybatis.bean.Employee" databaseId="mysql">     
+		select * from tb1_employee where id = #{id}
+	</select>
+	
+ 	<!-- 如果返回的结果是一个集合，要写集合元素的类型 -->
+ 	<select id="getEmpsByLastNameLike" resultType="com.yubajin.mybatis.bean.Employee">
+ 		select * from tb1_employee where last_name like #{lastName}
+ 	</select>
+ 
+	<select id="getEmpByIdAndLastName" resultType="com.yubajin.mybatis.bean.Employee">     
+		select * from tb1_employee where id = #{id} and last_name = #{lastName}
+	</select>
+	
+	<select id="getEmpByMap" resultType="com.yubajin.mybatis.bean.Employee">
+		select * from ${tableName} where id = #{id} and last_name = #{lastName}
+	</select>
+	
+	<!-- mysql支持自增主键，自增主键值的获取，mybatis利用statement.getGenreatedKeys();
+		 useGeneratedKeys="true";使用自增主键获取主键值策略
+		 keyProperty:指定对应的主键属性，也就是mybatis获取到主键值以后封装给javaBean的那个属性 -->
+	<!-- 支持传一个对象过来，mybatis自动从对象里取到属性的值 -->	 
+	<insert id="addEmp" parameterType="com.yubajin.mybatis.bean.Employee"
+			useGeneratedKeys="true" keyProperty="id">
+		insert into tb1_employee(last_name,email,gender)
+		values(#{lastName},#{email},#{gender})
+	</insert>
+	
+	<!-- Oracle不支持自增，Oracle使用序列来模拟自增；
+		 每次插入的数据的主键是从序列中拿到的值，如何获取到这个值 -->
+		 
+	<insert id="addEmp" parameterType="com.yubajin.mybatis.bean.Employee" databaseId="oracle">
+	
+		<!-- keyProperty:查出的主键值封装给JavaBean的哪个属性 
+			 order="BEFORE":当前sql在插入sql之前运行
+			 resultType:查出的数据的返回值类型-->
+			 
+		<selectKey keyProperty="id" order="BEFORE">	select EMPLOYEES_SEQ.nextval from dual
+		</selectKey>
+		<!-- 插入的主键是从序列中拿到的 -->
+		insert into tb1_employee(id,last_name,email,gender)
+		values(#{id},#{lastName},#{email},#{gender})
+	</insert>
+	
+	<update id="updateEmp">
+		update tb1_employee
+		set last_name=#{lastName},email=#{email},gender=#{gender}
+		where id=#{id}
+	</update>
+	
+	<delete id="deleteEmpById">
+		delete from tb1_employee where id=#{id}
+	</delete>
+	
+</mapper>
